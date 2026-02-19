@@ -1,0 +1,36 @@
+name: Compile Check (win32/win64)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  cross-compile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install MinGW toolchains
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-mingw-w64-x86-64 g++-mingw-w64-i686
+
+      - name: Build win32 binary
+        run: |
+          i686-w64-mingw32-g++ -std=c++17 -O2 r.cpp -o fm_r-win32.exe
+
+      - name: Build win64 binary
+        run: |
+          x86_64-w64-mingw32-g++ -std=c++17 -O2 r.cpp -o fm_r-win64.exe
+
+      - name: Upload compile artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compile-check-binaries
+          path: |
+            fm_r-win32.exe
+            fm_r-win64.exe
